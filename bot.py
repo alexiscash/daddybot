@@ -15,10 +15,11 @@ bot = commands.Bot(command_prefix='!')
 async def on_ready():
   print(f'{bot.user.name} is mf ready.')
 
-@bot.event
-async def on_member_join(member):
-  await member.create_dm()
-  await member.dm_channel.send(f"Hello {member.name}, welcome to daddy's server.")
+# ! deadass idk how to do this 
+# @bot.event
+# async def on_member_join(member):
+#   await member.create_dm()
+#   await member.dm_channel.send(f"Hello {member.name}, welcome to {member.guild.name}'s server.")
 
 @bot.event
 async def on_message(message):
@@ -87,7 +88,6 @@ async def get_gif(ctx, q, *argv):
 
   await ctx.send(embed_url)
 
-
 @bot.command(name="space", help="tells how many astronauts are in space rn")
 async def get_mf_astronauts(ctx):
   await ctx.trigger_typing()
@@ -96,9 +96,17 @@ async def get_mf_astronauts(ctx):
   json = response.json()
   await ctx.send(json)
 
+@bot.command(name="ready", help="daddybot helpfully lets you know that he is ready to go.")
+async def say_ready(ctx):
+  await ctx.trigger_typing()
+  await ctx.send(f"{bot.user.name} is ready to go")
+
 @bot.command(name="test", help="used by that dickhead alexis for testing stuff")
 async def test(ctx):
-  await ctx.trigger_typing()
-  await ctx.send("ayyy lmao", tts=True)
+  # for m in set(bot.get_all_members()):
+  #   print(bot)
+  print(set(bot.get_all_members()))
+  await ctx.send(f"There are {len(ctx.guild.members)} members on this server")
+
 
 bot.run(DISCORD_TOKEN)
