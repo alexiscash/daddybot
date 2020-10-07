@@ -1,25 +1,44 @@
 import os
+os.system('cls')
 import random
 
+import discord
 import requests
-from discord.ext import commands
+from discord.ext import commands, tasks
+from discord.ext.commands import CommandNotFound
 from dotenv import load_dotenv
 
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GIPHY_TOKEN = os.getenv("GIPHY_TOKEN")
 
-bot = commands.Bot(command_prefix='d/')
+bot = commands.Bot(command_prefix='.')
+status = ['h3ll0fr1end.wav', 'd3bug.mkv', 'da3m0ns.mp4', '3xpl0its.wmv', 'k3rnel-pan1c.ksd', 'logic-b0mb.hc',
+          'm4ster-s1ave.aes', 'h4ndshake.sme', 'succ3ss0r.p12', 'init_5.fve', 'h1dden-pr0cess.axx', 'runtime-error.r00', 'shutdown -r']
 
 @bot.event
 async def on_ready():
   print(f'{bot.user.name} is mf ready.')
+  # channel = bot.get_channel(749370616720654461)
+  # await channel.send("oh wait im not real")
+  change_status.start()
+
+@tasks.loop(seconds=300)
+async def change_status():
+  await bot.change_presence(activity=discord.Game(random.choice(status)))
 
 # ! deadass idk how to do this 
 # @bot.event
 # async def on_member_join(member):
 #   await member.create_dm()
 #   await member.dm_channel.send(f"Hello {member.name}, welcome to {member.guild.name}'s server.")
+
+@bot.event
+async def on_command_error(ctx, error):
+  if isinstance(error, CommandNotFound):
+    await ctx.send("command not found ya dumby")
+    return
+  raise error
 
 @bot.event
 async def on_message(message):
@@ -50,17 +69,18 @@ async def say(ctx):
   await ctx.trigger_typing()
   await ctx.send(ctx.message.content.split(' ', 1)[1])
 
-@bot.command(name='memeee', help='should generate a random meme')
-async def get_meme(ctx):
-  await ctx.trigger_typing()
-  url = "https://ronreiter-meme-generator.p.rapidapi.com/meme"
-  querystring = {"font":"Impact","font_size":"50","meme":"Condescending-Wonka","top":"Top text","bottom":"Bottom text"}
-  headers = {
-      'x-rapidapi-host': "ronreiter-meme-generator.p.rapidapi.com",
-      'x-rapidapi-key': "2a9c5fff77mshaabf4ba686b0433p1279eajsnb74d28ce170d"
-      }
-  response = requests.get(url, headers=headers, params=querystring)
-  await ctx.send(response.text)
+# ! Deprecated  token dont work no more
+# @bot.command(name='memeee', help='should generate a random meme')
+# async def get_meme(ctx):
+#   await ctx.trigger_typing()
+#   url = "https://ronreiter-meme-generator.p.rapidapi.com/meme"
+#   querystring = {"font":"Impact","font_size":"50","meme":"Condescending-Wonka","top":"Top text","bottom":"Bottom text"}
+#   headers = {
+#       'x-rapidapi-host': "ronreiter-meme-generator.p.rapidapi.com",
+#       'x-rapidapi-key': "2a9c5fff77mshaabf4ba686b0433p1279eajsnb74d28ce170d"
+#       }
+#   response = requests.get(url, headers=headers, params=querystring)
+#   await ctx.send(response.text)
 
 @bot.command(name='joke', help='generates a funny ass joke from JokeAPI')
 async def joke(ctx):
@@ -101,11 +121,203 @@ async def say_ready(ctx):
   await ctx.trigger_typing()
   await ctx.send(f"{bot.user.name} is ready to go")
 
-@bot.command(name="test", help="used by that dickhead alexis for testing stuff")
+
+ # ! BIG CHUNGUS   
+ # !
+ # !
+@bot.command(name="chungus", help="controls the muting stuff for playing among us")
+async def chungus(ctx):
+  pass
+
+global leader
+leader = None
+
+global ghostmode_on
+ghostmode_on = False
+
+global in_discussion
+in_discussion = False
+
+global dead_members
+dead_members = []
+
+
+@bot.command()
+async def host(ctx):
+  global leader 
+
+  if leader == None:
+    leader= ctx.author
+    await ctx.trigger_typing()
+    await ctx.send(f"Host connected: {ctx.author.name}")
+  elif leader != None and leader != ctx.author:
+    await ctx.trigger_typing()
+    await ctx.send(f"Sorry, {leader} is already a host. The host can disconnect by typing .host again.")
+  else:
+    await ctx.trigger_typing()
+    await ctx.send(f"Host disconnected: {ctx.author.name}")
+    leader = None
+
+@bot.command()
+async def users(ctx):
+  global leader
+
+  if leader == None:
+    await ctx.trigger_typing()
+    await ctx.send("The host must first connect by typing '.host'.")
+  else:
+    await ctx.trigger_typing()
+    string = "Users connected: \n"
+
+    for member in list(bot.get_channel(leader.voice.channel.id).members):
+      string = string + f"- {member}\n"
+
+    await ctx.send(f"```{string}```")
+
+@bot.command()
+async def deadrn(ctx):
+  global leader
+  global dead_members 
+
+  if leader == None:
+    await ctx.trigger_typing()
+    await ctx.send("The host must first connect by typing '.host'.")
+  else:
+    await ctx.trigger_typing()
+    string = "Users dead rn: \n"
+
+    for member in dead_members:
+      string = string + f"- {member}\n"
+
+    await ctx.send(f"```{string}```")
+
+@bot.command()
+async def mute(ctx):
+  global leader 
+  global ghostmode_on
+
+  global in_discussion
+  in_discussion = False
+
+  if ctx.author != leader:
+    await ctx.trigger_typing()
+    await ctx.send("Only the host can use this command")
+    return
+
+  for member in list(bot.get_channel(leader.voice.channel.id).members):
+    if member.id in dead_members and ghostmode_on:
+      await member.edit(mute = False)
+    elif member.id not in dead_members and ghostmode_on:
+      await member.edit(deafen = True, mute = True)
+    else:
+      await member.edit(mute = True)
+    
+@bot.command()
+async def unmute(ctx):
+  global leader
+  global dead_members
+  global ghostmode_on
+
+  global in_discussion
+  in_discussion = True
+
+  if ctx.author != leader:
+    await ctx.trigger_typing()
+    await ctx.send("Only the host can use this command")
+    return
+  
+  for member in list(bot.get_channel(leader.voice.channel.id).members):
+      if member.id in dead_members and ghostmode_on:
+          await member.edit(mute = True)
+      elif member.id in dead_members and ghostmode_on == False:
+          await member.edit(mute = True)
+      elif member.id not in dead_members and ghostmode_on:
+          await member.edit(deafen = False, mute = False)
+      else:
+          await member.edit(mute = False)
+
+@bot.command()
+async def clear(ctx):
+  global leader 
+
+  global dead_members
+  dead_members = []
+
+  if ctx.author != leader:
+    await ctx.trigger_typing()
+    await ctx.send("Only the host can use this command")
+    return
+
+  for member in list(bot.get_channel(leader.voice.channel.id).members):
+    await member.edit(deafen = False, mute = False)
+
+@bot.command()
+async def dead(ctx):
+  global ghostmode_on
+  global dead_members
+
+  if ghostmode_on:
+    await ctx.author.edit(mute = False, deafen = False)
+  else:
+    await ctx.author.edit(mute = True)
+
+  if ctx.author not in dead_members:
+    dead_members.append(ctx.author.id)
+
+@bot.command()
+async def kill(ctx, *members: discord.Member):
+  global leader
+  global dead_members
+  global ghostmode_on
+
+  for member in members:
+    if member not in list(bot.get_channel(leader.voice.channel.id).members):
+      await ctx.trigger_typing()
+      await ctx.send(f"User not in channel: {member}")
+      continue
+
+    try:
+      if ghostmode_on and in_discussion:
+        await member.edit(mute = True)
+        valid = True
+      elif ghostmode_on and in_discussion == False:
+        await member.edit(deafen = False, mute = False)
+        valid = True
+      else:
+        await member.edit(mute = True)
+        valid = True
+    except Exception as e:
+      print(e)
+      await ctx.trigger_typing()
+      await ctx.send(f"Invalid user: {member}")
+
+    if valid and member.id not in dead_members:
+      dead_members.append(member.id)
+
+@bot.command()
+async def ghostmode(ctx):
+  global ghostmode_on
+
+  if ctx.author != leader:
+    await ctx.trigger_typing()
+    await ctx.send("Only the host can use this command")
+  else:
+    if ghostmode_on:
+      ghostmode_on = False
+      await ctx.trigger_typing()
+      await ctx.send("``` Ghost mode activated ```")
+    else:
+      ghostmode_on = True
+      await ctx.trigger_typing()
+      await ctx.send("``` Ghost mode activated ```")
+
+# !
+# ! end chungus
+
+
+@bot.command(help="used for testing purposes by that dickhead alexis")
 async def test(ctx):
-  # for m in set(bot.get_all_members()):
-  #   print(bot)
-  print(set(bot.get_all_members()))
+  await ctx.trigger_typing()
   await ctx.send(f"There are {len(ctx.guild.members)} members on this server")
 
 
