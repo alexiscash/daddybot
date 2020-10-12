@@ -102,11 +102,13 @@ async def joke(ctx):
 @bot.command(name="gif", help="should return a gif from GIPHY API")
 async def get_gif(ctx, q, *argv):
   await ctx.trigger_typing()
-  url = f"http://api.giphy.com/v1/gifs/search?api_key={GIPHY_TOKEN}&q={q}&limit=2"
-  response = requests.get(url)
-  embed_url = response.json()['data'][0]['embed_url']
+  await ctx.send("i accidentally deleted the password for this so just dont use this")
+#   await ctx.trigger_typing()
+#   url = f"http://api.giphy.com/v1/gifs/search?api_key={GIPHY_TOKEN}&q={q}&limit=2"
+#   response = requests.get(url)
+#   embed_url = response.json()['data'][0]['embed_url']
 
-  await ctx.send(embed_url)
+#   await ctx.send(embed_url)
 
 @bot.command(name="space", help="tells how many astronauts are in space rn")
 async def get_mf_astronauts(ctx):
