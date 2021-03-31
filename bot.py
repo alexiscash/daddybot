@@ -16,12 +16,18 @@ bot = commands.Bot(command_prefix='.')
 status = ['h3ll0fr1end.wav', 'd3bug.mkv', 'da3m0ns.mp4', '3xpl0its.wmv', 'k3rnel-pan1c.ksd', 'logic-b0mb.hc',
           'm4ster-s1ave.aes', 'h4ndshake.sme', 'succ3ss0r.p12', 'init_5.fve', 'h1dden-pr0cess.axx', 'runtime-error.r00', 'shutdown -r']
 
+global not_started
+not_started = True
 @bot.event
 async def on_ready():
+  global not_started
+
   print(f'{bot.user.name} is mf ready.')
   # channel = bot.get_channel(749370616720654461)
   # await channel.send("oh wait im not real")
-  change_status.start()
+  if not_started:
+    change_status.start()
+    not_started = False
 
 @tasks.loop(seconds=300)
 async def change_status():
@@ -164,17 +170,20 @@ async def host(ctx):
 async def users(ctx):
   global leader
 
-  if leader == None:
-    await ctx.trigger_typing()
-    await ctx.send("The host must first connect by typing '.host'.")
-  else:
-    await ctx.trigger_typing()
-    string = "Users connected: \n"
+  await ctx.trigger_typing()
+  try:
+    if leader == None:
+      await ctx.send("The host must first connect by typing '.host'.")
+    else:
+      await ctx.trigger_typing()
+      string = "Users connected: \n"
 
-    for member in list(bot.get_channel(leader.voice.channel.id).members):
-      string = string + f"- {member}\n"
+      for member in list(bot.get_channel(leader.voice.channel.id).members):
+        string = string + f"- {member}\n"
 
-    await ctx.send(f"```{string}```")
+      await ctx.send(f"```{string}```")
+  except AttributeError as err:
+    await ctx.send('host is not in a voice channel')
 
 @bot.command()
 async def deadrn(ctx):
