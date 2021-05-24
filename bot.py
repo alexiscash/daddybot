@@ -33,7 +33,7 @@ async def on_ready():
 async def change_status():
   await bot.change_presence(activity=discord.Game(random.choice(status)))
 
-# ! deadass idk how to do this 
+# ! deadass idk how to do this pp
 # @bot.event
 # async def on_member_join(member):
 #   await member.create_dm()
