@@ -1,5 +1,4 @@
 import os
-os.system('cls')
 import random
 
 import discord
@@ -7,6 +6,8 @@ import requests
 from discord.ext import commands, tasks
 from discord.ext.commands import CommandNotFound
 from dotenv import load_dotenv
+
+os.system('cls')
 
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
@@ -33,7 +34,7 @@ async def on_ready():
 async def change_status():
   await bot.change_presence(activity=discord.Game(random.choice(status)))
 
-# ! deadass idk how to do this pp
+# ! deadass idk how to do this
 # @bot.event
 # async def on_member_join(member):
 #   await member.create_dm()
