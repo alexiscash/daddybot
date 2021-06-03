@@ -1,6 +1,7 @@
 import os
 import random
 
+import logging
 import discord
 import requests
 from discord.ext import commands, tasks
@@ -8,6 +9,8 @@ from discord.ext.commands import CommandNotFound
 from dotenv import load_dotenv
 
 os.system('cls')
+
+logging.basicConfig(level=logging.ERROR)
 
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
